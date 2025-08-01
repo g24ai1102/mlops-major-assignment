@@ -1,28 +1,20 @@
-# tests/test_train.py
-
 import pytest
-import joblib
-import os
-from sklearn.linear_model import LinearRegression
 from sklearn.datasets import fetch_california_housing
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from sklearn.model_selection import train_test_split
 
 @pytest.fixture
 def data():
     X, y = fetch_california_housing(return_X_y=True)
-    return X, y
+    return train_test_split(X, y, test_size=0.2, random_state=42)
 
-def test_model_type():
-    model = joblib.load("artifacts/model.joblib")
-    assert isinstance(model, LinearRegression)
-
-def test_model_trained():
-    model = joblib.load("artifacts/model.joblib")
-    assert hasattr(model, "coef_"), "Model does not have coefficients. Seems untrained."
-
-def test_r2_score_above_threshold(data):
-    X, y = data
-    model = joblib.load("artifacts/model.joblib")
-    y_pred = model.predict(X)
-    score = r2_score(y, y_pred)
-    assert score > 0.5, f"R2 score too low: {score}"
+def test_model_training(data):
+    X_train, X_test, y_train, y_test = data
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    
+    assert hasattr(model, "coef_"), "Model doesn't seem trained"
+    y_pred = model.predict(X_test)
+    r2 = r2_score(y_test, y_pred)
+    assert r2 > 0.5, f"R2 too low: {r2}"

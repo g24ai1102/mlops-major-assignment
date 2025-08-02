@@ -37,4 +37,13 @@ dequantized_coef = quantized_coef.astype(np.float32) / 255 * (coef_max - coef_mi
 X, y = fetch_california_housing(return_X_y=True)
 y_pred = X @ dequantized_coef + intercept
 r2 = r2_score(y, y_pred)
+
+unquant_size = os.path.getsize("artifacts/unquant_params.joblib") / 1024  # KB
+quant_size = os.path.getsize("artifacts/quant_params.joblib") / 1024  # KB
+y_pred_unquant = X @ coef + intercept
+r2_unquant = r2_score(y, y_pred_unquant)
+
+print(f"R2 before quantization: {r2_unquant:.4f}")
 print(f"R2 after quantization: {r2:.4f}")
+print(f"Unquantized file size: {unquant_size:.2f} KB")
+print(f"Quantized file size: {quant_size:.2f} KB")
